@@ -6,14 +6,18 @@ const Login = () => {
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
+    remember: false
   });
   const [errors, setErrors] = useState({});
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials({ ...credentials, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setCredentials({ 
+      ...credentials, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
 
   const validate = () => {
@@ -74,6 +78,19 @@ const Login = () => {
               className={errors.password ? 'form-control is-invalid' : 'form-control'}
             />
             {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+          </div>
+          
+          <div className="form-group remember-me">
+            <label className="checkbox-container">
+              <input
+                type="checkbox"
+                name="remember"
+                checked={credentials.remember}
+                onChange={handleChange}
+              />
+              <span className="checkmark"></span>
+              Remember me
+            </label>
           </div>
           
           <div className="form-group">

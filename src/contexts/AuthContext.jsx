@@ -25,6 +25,8 @@ export const AuthProvider = ({ children }) => {
                 try {
                     const response = await axios.get('/me');
                     setUser(response.data.user);
+                    // Store user in localStorage for role checking
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
                 } catch (error) {
                     console.error('Authentication error:', error);
                     logout();
@@ -48,6 +50,7 @@ export const AuthProvider = ({ children }) => {
             setToken(response.data.token);
             setUser(response.data.user);
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             return response.data;
         } catch (error) {
             setError(error.response?.data?.message || 'Registration failed');
@@ -57,7 +60,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Login user
+    // Login user with remember me
     const login = async (credentials) => {
         setLoading(true);
         setError(null);
@@ -66,6 +69,7 @@ export const AuthProvider = ({ children }) => {
             setToken(response.data.token);
             setUser(response.data.user);
             localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             return response.data;
         } catch (error) {
             setError(error.response?.data?.message || 'Login failed');
@@ -88,6 +92,7 @@ export const AuthProvider = ({ children }) => {
             setToken(null);
             setUser(null);
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             delete axios.defaults.headers.common['Authorization'];
             setLoading(false);
         }

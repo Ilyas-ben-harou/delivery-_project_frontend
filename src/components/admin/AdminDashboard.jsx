@@ -5,15 +5,7 @@ const AdminDashboard = () => {
   const { user, logout } = useAuth();
 
   return (
-    <div className="admin-dashboard">
-      <header className="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <div className="user-info">
-          <span>Welcome, Admin</span>
-          <button onClick={logout} className="btn btn-outline-danger">Logout</button>
-        </div>
-      </header>
-      
+    <div className="admin-dashboard">      
       <div className="dashboard-content">
         <div className="dashboard-card">
           <h3>User Management</h3>

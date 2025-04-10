@@ -6,15 +6,7 @@ const ClientDashboard = () => {
   const clientInfo = user?.client;
 
   return (
-    <div className="client-dashboard">
-      <header className="dashboard-header">
-        <h1>Client Dashboard</h1>
-        <div className="user-info">
-          <span>Welcome, {clientInfo?.company_name}</span>
-          <button onClick={logout} className="btn btn-outline-danger">Logout</button>
-        </div>
-      </header>
-      
+    <div className="client-dashboard">      
       <div className="dashboard-content">
         <div className="dashboard-card">
           <h3>Create Order</h3>

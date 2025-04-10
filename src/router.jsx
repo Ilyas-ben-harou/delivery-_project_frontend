@@ -1,4 +1,100 @@
+import { createBrowserRouter } from "react-router-dom";
 
-import {createBrowserRouter} from "react-router"
-const router =createBrowserRouter([]);
-export default router
+// Auth components
+import Login from "./components/auth/Login";
+// import Register from './components/auth/Register';
+import ResetPassword from "./components/auth/ResetPassword"
+import Unauthorized from "./components/common/Unauthorized";
+
+// Dashboard components
+import AdminDashboard from "./components/admin/AdminDashboard"
+import ClientDashboard from "./components/client/ClientDashboard"
+import LivreurDashboard from "./components/livreur/LivreurDashboard"
+
+// Layout components
+import AdminLayout from "./components/layouts/AdminLayout";
+import ClientLayout from "./components/layouts/ClientLayout";
+import LivreurLayout from './components/layouts/LivreurLayout';
+
+// Auth middleware
+import { requireAuth, requireRole } from './middleware/auth';
+
+const router = createBrowserRouter([
+    // Public routes
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    // {
+    //     path: "/register",
+    //     element: <Register />,
+    // },
+    {
+        path: "/reset-password",
+        element: <ResetPassword />,
+    },
+    {
+        path: "/unauthorized",
+        element: <Unauthorized />,
+    },
+
+    // Admin routes
+    {
+        path: "/admin",
+        element: <AdminLayout />,
+        loader: () => requireRole('admin'),
+        children: [
+            {
+                path: "dashboard",
+                element: <AdminDashboard />,
+            },
+            // Add more admin routes here
+        ],
+    },
+
+    // Client routes
+    {
+        path: "/client",
+        element: <ClientLayout />,
+        loader: () => requireRole('client'),
+        children: [
+            {
+                path: "dashboard",
+                element: <ClientDashboard />,
+            },
+            // Add more client routes here
+        ],
+    },
+
+    // Livreur routes
+    {
+        path: "/livreur",
+        element: <LivreurLayout />,
+        loader: () => requireRole('livreur'),
+        children: [
+            {
+                path: "dashboard",
+                element: <LivreurDashboard />,
+            },
+            // Add more livreur routes here
+        ],
+    },
+
+    // Default redirect to login
+    {
+        path: "/",
+        loader: () => {
+            window.location.href = "/login";
+            return null;
+        },
+    },
+    {
+        path: "*",
+        loader: () => {
+            window.location.href = "/login";
+            return null;
+        },
+    },
+]);
+
+export default router;
