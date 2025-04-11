@@ -19,12 +19,17 @@ import LivreurLayout from './components/layouts/LivreurLayout';
 // Auth middleware
 import { requireAuth, requireRole } from './middleware/auth';
 import ForgotPassword from "./components/auth/ForgotPassword";
+import Register from "./components/auth/Register";
 
 const router = createBrowserRouter([
     // Public routes
     {
         path: "/login",
         element: <Login />,
+    },
+    {
+        path: "/register",
+        element: <Register />,
     },
 
     {
