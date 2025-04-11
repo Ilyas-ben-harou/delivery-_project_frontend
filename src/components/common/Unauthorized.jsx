@@ -8,7 +8,7 @@ const Unauthorized = () => {
     const getDashboardLink = () => {
         if (!user) return '/login';
 
-        switch (user.user_type) {
+        switch (user.role) {
             case 'admin':
                 return '/admin/dashboard';
             case 'client':

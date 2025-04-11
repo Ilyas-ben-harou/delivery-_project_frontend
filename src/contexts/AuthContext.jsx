@@ -41,24 +41,7 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, [token]);
 
-    // Register user
-    const register = async (userData) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await axios.post('/register', userData);
-            setToken(response.data.token);
-            setUser(response.data.user);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            return response.data;
-        } catch (error) {
-            setError(error.response?.data?.message || 'Registration failed');
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
+    
 
     // Login user with remember me
     const login = async (credentials) => {
@@ -98,21 +81,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Reset password
-    const resetPassword = async (data) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const response = await axios.post('/reset-password', data);
-            return response.data;
-        } catch (error) {
-            setError(error.response?.data?.message || 'Password reset failed');
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // Check if user has a specific role
     const hasRole = (role) => {
         return user?.user_type === role;
@@ -127,10 +95,8 @@ export const AuthProvider = ({ children }) => {
         token,
         loading,
         error,
-        register,
         login,
         logout,
-        resetPassword,
         isAdmin,
         isClient,
         isLivreur,

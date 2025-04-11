@@ -18,6 +18,7 @@ import LivreurLayout from './components/layouts/LivreurLayout';
 
 // Auth middleware
 import { requireAuth, requireRole } from './middleware/auth';
+import ForgotPassword from "./components/auth/ForgotPassword";
 
 const router = createBrowserRouter([
     // Public routes
@@ -25,14 +26,16 @@ const router = createBrowserRouter([
         path: "/login",
         element: <Login />,
     },
-    // {
-    //     path: "/register",
-    //     element: <Register />,
-    // },
+
     {
-        path: "/reset-password",
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+    },
+    {
+        path:  "/reset-password/:token/:email",
         element: <ResetPassword />,
     },
+    
     {
         path: "/unauthorized",
         element: <Unauthorized />,
@@ -48,6 +51,7 @@ const router = createBrowserRouter([
                 path: "dashboard",
                 element: <AdminDashboard />,
             },
+            
             // Add more admin routes here
         ],
     },
