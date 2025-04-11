@@ -1,23 +1,24 @@
 import React, { useState } from "react";
 import axios from "axios";
-const RegistrationForm = () => {
+
+const Register = () => {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
     telephone: "",
     email: "",
-    motDePasse: "",
-    confirmMotDePasse: "",
+    password: "",
+    password_confirmation: "",
     boutique: "",
     cin: "",
     banque: "AL BARID BANK",
     rib: "",
     ville: "CASABLANCA",
     adresse: "",
-    termsAccepted: false,
   });
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -34,10 +35,10 @@ const RegistrationForm = () => {
     if (!formData.nom.trim()) newErrors.nom = "Le nom est requis";
     if (!formData.prenom.trim()) newErrors.prenom = "Le prénom est requis";
 
-    // Validation téléphone (format marocain)
-    const phoneRegex = /^212[0-9]{9}$/;
+    // Validation téléphone (format marocain - 00212 suivi de 9 chiffres)
+    const phoneRegex = /^\+212[0-9]{9}$/;
     if (!phoneRegex.test(formData.telephone)) {
-      newErrors.telephone = "Format invalide (00212 suivi de 9 chiffres)";
+      newErrors.telephone = "Format invalide (+212 suivi de 9 chiffres)";
     }
 
     // Validation email
@@ -47,14 +48,14 @@ const RegistrationForm = () => {
     }
 
     // Validation mot de passe
-    if (formData.motDePasse.length < 8) {
-      newErrors.motDePasse =
+    if (formData.password.length < 8) {
+      newErrors.password =
         "Le mot de passe doit contenir au moins 8 caractères";
     }
 
     // Confirmation mot de passe
-    if (formData.motDePasse !== formData.confirmMotDePasse) {
-      newErrors.confirmMotDePasse = "Les mots de passe ne correspondent pas";
+    if (formData.password !== formData.password_confirmation) {
+      newErrors.password_confirmation = "Les mots de passe ne correspondent pas";
     }
 
     // Validation RIB (24 chiffres pour le Maroc)
@@ -67,8 +68,6 @@ const RegistrationForm = () => {
     if (!formData.boutique.trim())
       newErrors.boutique = "Nom de boutique requis";
     if (!formData.cin.trim()) newErrors.cin = "CIN requis";
-    if (!formData.termsAccepted)
-      newErrors.termsAccepted = "Vous devez accepter les mentions légales";
 
     return newErrors;
   };
@@ -76,54 +75,55 @@ const RegistrationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
-
+    
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
       return;
     }
 
-    // Reset errors
+    setIsSubmitting(true);
     setErrors({});
-
-    // Set up loading state if needed
-    // setIsLoading(true);
 
     try {
       // Make API call to Laravel backend
       const response = await axios.post(
-        "http://your-laravel-api-url/api/register",
+        "http://127.0.0.1:8000/api/register",
         formData
       );
-
+      
       console.log("Registration successful:", response.data);
 
-      // Show success message or redirect user
-      // setSuccessMessage('Registration successful! Please check your email for verification.');
-      // Or redirect: history.push('/registration-success');
+      
+      // Reset form or redirect user
+      // window.location.href = "/login"; // Uncomment to redirect
+      
     } catch (error) {
-      // Handle API errors
       console.error("Registration error:", error);
-
+      
+      // Handle API validation errors
       if (error.response && error.response.data && error.response.data.errors) {
-        // Set validation errors from the server
-        //setErrors(error.response.data.errors);
+        setErrors(error.response.data.errors);
       } else {
-        // Set general error message
-        //setGeneralError('An error occurred during registration. Please try again.');
+        setErrors({ general: "Une erreur s'est produite lors de l'inscription." });
       }
     } finally {
-      // Clear loading state if needed
-      // setIsLoading(false);
+      setIsSubmitting(false);
     }
-  };
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 sm:p-8">
-        <p className=" text-blue-900">Créer votre compte</p>
+        <p className="text-blue-900">Créer votre compte</p>
         <h2 className="text-2xl font-bold text-blue-900 mb-6 text-left">
           Livrer avec Bolt
         </h2>
+
+        {errors.general && (
+          <div className="mb-4 bg-red-50 p-4 rounded border border-red-200">
+            <p className="text-red-600">{errors.general}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nom et Prénom */}
@@ -193,13 +193,13 @@ const RegistrationForm = () => {
                 value={formData.telephone}
                 onChange={handleChange}
                 required
-                placeholder="212000000000"
+                placeholder="+212000000000"
                 className={`mt-1 block w-full border ${
                   errors.telephone ? "border-red-500" : "border-gray-300"
                 } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Format: 00212 0 00 00 00 00
+                Format: 00212 suivi de 9 chiffres
               </p>
               {errors.telephone && (
                 <p className="mt-1 text-sm text-red-500">{errors.telephone}</p>
@@ -235,50 +235,50 @@ const RegistrationForm = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label
-                htmlFor="motDePasse"
+                htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
                 Mot de passe <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
-                id="motDePasse"
-                name="motDePasse"
-                value={formData.motDePasse}
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 required
                 className={`mt-1 block w-full border ${
-                  errors.motDePasse ? "border-red-500" : "border-gray-300"
+                  errors.password ? "border-red-500" : "border-gray-300"
                 } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
               />
-              {errors.motDePasse && (
-                <p className="mt-1 text-sm text-red-500">{errors.motDePasse}</p>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
               )}
             </div>
 
             <div>
               <label
-                htmlFor="confirmMotDePasse"
+                htmlFor="password_confirmation"
                 className="block text-sm font-medium text-gray-700"
               >
                 Confirmez mot de passe <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
-                id="confirmMotDePasse"
-                name="confirmMotDePasse"
-                value={formData.confirmMotDePasse}
+                id="password_confirmation"
+                name="password_confirmation"
+                value={formData.password_confirmation}
                 onChange={handleChange}
                 required
                 className={`mt-1 block w-full border ${
-                  errors.confirmMotDePasse
+                  errors.password_confirmation
                     ? "border-red-500"
                     : "border-gray-300"
                 } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
               />
-              {errors.confirmMotDePasse && (
+              {errors.password_confirmation && (
                 <p className="mt-1 text-sm text-red-500">
-                  {errors.confirmMotDePasse}
+                  {errors.password_confirmation}
                 </p>
               )}
             </div>
@@ -355,6 +355,9 @@ const RegistrationForm = () => {
                 <option value="BMCI">BMCI</option>
                 <option value="ATTIJARI">ATTIJARI</option>
               </select>
+              {errors.banque && (
+                <p className="mt-1 text-sm text-red-500">{errors.banque}</p>
+              )}
             </div>
 
             <div>
@@ -373,7 +376,7 @@ const RegistrationForm = () => {
                 required
                 placeholder="000000000000000000000000"
                 className={`mt-1 block w-full border ${
-                  errors.rib ? "border-bleu-500" : "border-gray-300"
+                  errors.rib ? "border-red-500" : "border-gray-300"
                 } rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
               />
               {errors.rib && (
@@ -382,7 +385,7 @@ const RegistrationForm = () => {
             </div>
           </div>
 
-          {/* Ville et Pack */}
+          {/* Ville */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label
@@ -404,6 +407,9 @@ const RegistrationForm = () => {
                 <option value="RABAT">RABAT</option>
                 <option value="MARRAKECH">MARRAKECH</option>
               </select>
+              {errors.ville && (
+                <p className="mt-1 text-sm text-red-500">{errors.ville}</p>
+              )}
             </div>
           </div>
 
@@ -423,49 +429,21 @@ const RegistrationForm = () => {
               onChange={handleChange}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
-          </div>
-
-          {/* Conditions */}
-          <div className="flex items-start">
-            <div className="flex items-center h-5">
-              <input
-                type="checkbox"
-                id="termsAccepted"
-                name="termsAccepted"
-                checked={formData.termsAccepted}
-                onChange={handleChange}
-                required
-                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-              />
-            </div>
-            <div className="ml-3 text-sm">
-              <label
-                htmlFor="termsAccepted"
-                className={`font-medium ${
-                  errors.termsAccepted ? "text-red-500" : "text-gray-700"
-                }`}
-              >
-                J'ai lu et compris les{" "}
-                <span className="text-indigo-600 cursor-pointer hover:underline">
-                  Mentions légales
-                </span>
-                .
-              </label>
-              {errors.termsAccepted && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.termsAccepted}
-                </p>
-              )}
-            </div>
+            {errors.adresse && (
+              <p className="mt-1 text-sm text-red-500">{errors.adresse}</p>
+            )}
           </div>
 
           {/* Submit button */}
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isSubmitting}
+              className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                isSubmitting ? "bg-indigo-400" : "bg-indigo-600 hover:bg-indigo-700"
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
             >
-              S'inscrire
+              {isSubmitting ? "Inscription en cours..." : "S'inscrire"}
             </button>
           </div>
         </form>
@@ -474,4 +452,4 @@ const RegistrationForm = () => {
   );
 };
 
-export default RegistrationForm;
+export default Register;

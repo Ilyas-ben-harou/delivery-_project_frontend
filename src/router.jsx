@@ -1,4 +1,10 @@
 
 import {createBrowserRouter} from "react-router"
-const router =createBrowserRouter([]);
+import Register from "./components/auth/Register";
+const router =createBrowserRouter([
+    {
+        path:'/register',
+        element:<Register/>
+    }
+]);
 export default router
