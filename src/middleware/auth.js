@@ -20,6 +20,7 @@ const getUser = () => {
 export const requireAuth = () => {
     const token = getToken();
     if (!token) {
+        
         return redirect("/login");
     }
     return null;
@@ -29,6 +30,7 @@ export const requireAuth = () => {
 export const requireRole = (role) => {
     const token = getToken();
     if (!token) {
+        
         return redirect("/login");
     }
 

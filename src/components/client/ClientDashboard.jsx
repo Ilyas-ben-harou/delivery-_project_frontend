@@ -1,9 +1,7 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 
 const ClientDashboard = () => {
-  const { user, logout } = useAuth();
-  const clientInfo = user?.client;
+  
 
   return (
     <div className="client-dashboard">      

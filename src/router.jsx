@@ -3,107 +3,141 @@ import { createBrowserRouter } from "react-router-dom";
 // Auth components
 import Login from "./components/auth/Login";
 // import Register from './components/auth/Register';
-import ResetPassword from "./components/auth/ResetPassword"
+import ResetPassword from "./components/auth/ResetPassword";
 import Unauthorized from "./components/common/Unauthorized";
 
 // Dashboard components
-import AdminDashboard from "./components/admin/AdminDashboard"
-import ClientDashboard from "./components/client/ClientDashboard"
-import LivreurDashboard from "./components/livreur/LivreurDashboard"
+import AdminDashboard from "./components/admin/AdminDashboard";
+import ClientDashboard from "./components/client/ClientDashboard";
+import LivreurDashboard from "./components/livreur/LivreurDashboard";
 
 // Layout components
 import AdminLayout from "./components/layouts/AdminLayout";
 import ClientLayout from "./components/layouts/ClientLayout";
-import LivreurLayout from './components/layouts/LivreurLayout';
+import LivreurLayout from "./components/layouts/LivreurLayout";
 
 // Auth middleware
-import { requireAuth, requireRole } from './middleware/auth';
+import { requireAuth, requireRole } from "./middleware/auth";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import Register from "./components/auth/Register";
+import LivreurRegister from "./components/admin/LivreurRegister";
+import LivreurListing from "./components/admin/LivreurListing";
+import UserDetail from "./components/admin/UserDetail";
+import ClientManagement from "./components/admin/ClientManagement";
+import FinanceReportPage from "./components/admin/FinanceReportPage";
+import OrdersManagement from "./components/admin/OrdersManagement";
+import RapportsFinances from "./components/admin/FinanceReportPage";
+import RapportsPerformance from "./components/admin/rapports-performance";
 
 const router = createBrowserRouter([
-    // Public routes
-    {
-        path: "/login",
-        element: <Login />,
-    },
-    {
-        path: "/register",
-        element: <Register />,
-    },
+  // Public routes
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
 
-    {
-        path: "/forgot-password",
-        element: <ForgotPassword />,
-    },
-    {
-        path:  "/reset-password/:token/:email",
-        element: <ResetPassword />,
-    },
-    
-    {
-        path: "/unauthorized",
-        element: <Unauthorized />,
-    },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password/:token/:email",
+    element: <ResetPassword />,
+  },
 
-    // Admin routes
-    {
-        path: "/admin",
-        element: <AdminLayout />,
-        loader: () => requireRole('admin'),
-        children: [
-            {
-                path: "dashboard",
-                element: <AdminDashboard />,
-            },
-            
-            // Add more admin routes here
-        ],
-    },
+  {
+    path: "/unauthorized",
+    element: <Unauthorized />,
+  },
 
-    // Client routes
-    {
-        path: "/client",
-        element: <ClientLayout />,
-        loader: () => requireRole('client'),
-        children: [
-            {
-                path: "dashboard",
-                element: <ClientDashboard />,
-            },
-            // Add more client routes here
-        ],
-    },
+  // Admin routes
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    loader: () => requireRole("admin"),
+    children: [
+      {
+        path: "dashboard",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "livreur/create",
+        element: <LivreurRegister />,
+      },
+      {
+        path: "livreurs",
+        element: <LivreurListing />,
+      },
+      {
+        path: "detail/:userId",
+        element: <UserDetail />,
+      },
+      {
+        path: "clients",
+        element: <ClientManagement />,
+      },
+      {
+        path: "orders",
+        element: <OrdersManagement />,
+      },
+      {
+        path: "reports",
+        element: <RapportsFinances />,
+      },
+      {
+        path: "Performance",
+        element: <RapportsPerformance />,
+      },
+    ],
+  },
 
-    // Livreur routes
-    {
-        path: "/livreur",
-        element: <LivreurLayout />,
-        loader: () => requireRole('livreur'),
-        children: [
-            {
-                path: "dashboard",
-                element: <LivreurDashboard />,
-            },
-            // Add more livreur routes here
-        ],
-    },
+  // Client routes
+  {
+    path: "/client",
+    element: <ClientLayout />,
+    loader: () => requireRole("client"),
+    children: [
+      {
+        path: "dashboard",
+        element: <ClientDashboard />,
+      },
+      // Add more client routes here
+    ],
+  },
 
-    // Default redirect to login
-    {
-        path: "/",
-        loader: () => {
-            window.location.href = "/login";
-            return null;
-        },
+  // Livreur routes
+  {
+    path: "/livreur",
+    element: <LivreurLayout />,
+    loader: () => requireRole("livreur"),
+    children: [
+      {
+        path: "dashboard",
+        element: <LivreurDashboard />,
+      },
+      // Add more livreur routes here
+    ],
+  },
+
+  // Default redirect to login
+  {
+    path: "/",
+    loader: () => {
+      window.location.href = "/login";
+      return null;
     },
-    {
-        path: "*",
-        loader: () => {
-            window.location.href = "/login";
-            return null;
-        },
+  },
+  {
+    path: "*",
+    loader: () => {
+      window.location.href = "/login";
+      return null;
     },
+  },
 ]);
 
 export default router;
