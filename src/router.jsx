@@ -28,9 +28,14 @@ import FinanceReportPage from "./components/admin/FinanceReportPage";
 import OrdersManagement from "./components/admin/OrdersManagement";
 import RapportsFinances from "./components/admin/FinanceReportPage";
 import RapportsPerformance from "./components/admin/rapports-performance";
+import Home from "./components/home/Home";
 
 const router = createBrowserRouter([
   // Public routes
+  {
+    path: "/",
+    element: <Home />,
+  },
   {
     path: "/login",
     element: <Login />,
@@ -124,17 +129,11 @@ const router = createBrowserRouter([
   },
 
   // Default redirect to login
-  {
-    path: "/",
-    loader: () => {
-      window.location.href = "/login";
-      return null;
-    },
-  },
+  
   {
     path: "*",
     loader: () => {
-      window.location.href = "/login";
+      window.location.href = "/Unauthorized";
       return null;
     },
   },
