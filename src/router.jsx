@@ -20,9 +20,9 @@ import LivreurLayout from "./components/layouts/LivreurLayout";
 import { requireAuth, requireRole } from "./middleware/auth";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import Register from "./components/auth/Register";
-import LivreurRegister from "./components/admin/LivreurRegister";
-import LivreurListing from "./components/admin/LivreurListing";
-import UserDetail from "./components/admin/UserDetail";
+import LivreurRegister from "./components/admin/livreurs/LivreurRegister";
+import LivreurListing from "./components/admin/livreurs/LivreurListing";
+import LivreurDetail from "./components/admin/livreurs/LivreurDetail"
 import ClientManagement from "./components/admin/ClientManagement";
 import FinanceReportPage from "./components/admin/FinanceReportPage";
 import OrdersManagement from "./components/admin/OrdersManagement";
@@ -78,8 +78,8 @@ const router = createBrowserRouter([
         element: <LivreurListing />,
       },
       {
-        path: "detail/:userId",
-        element: <UserDetail />,
+        path: "livreurs/:id",
+        element: <LivreurDetail />,
       },
       {
         path: "clients",

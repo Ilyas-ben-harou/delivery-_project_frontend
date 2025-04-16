@@ -4,15 +4,15 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from 'sonner'
 
-import { Button } from "../ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Separator } from "../ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
+import { Button } from "../../ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card"
+import { Input } from "../../ui/input"
+import { Label } from "../../ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
+import { Separator } from "../../ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { Loader2 } from "lucide-react"
-import { adminAxios } from "../../api/axios"
+import { adminAxios } from "../../../api/axios"
 
 export default function LivreurRegister() {
   const navigate = useNavigate()
