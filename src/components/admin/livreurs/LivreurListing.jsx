@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import * as XLSX from 'xlsx';
 import { Link } from "react-router-dom";
 import {
   Download,
@@ -56,6 +57,7 @@ export default function DistributorManagement() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [distributorToDelete, setDistributorToDelete] = useState(null);
 
+  const [isExporting, setIsExporting] = useState(false);
   // Data Fetching
   const fetchDistributors = useCallback(async () => {
     setIsLoading(true);
@@ -152,10 +154,58 @@ export default function DistributorManagement() {
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleExport = () => {
-    toast.info("Export Initiated", {
-      description: "Your distributor data export is being prepared. You'll receive a notification when ready.",
-      duration: 3000,
-    });
+    try {
+      setIsExporting(true);
+      // Use filteredDistributors which already respects all your filters
+      const dataToExport = filteredDistributors.map(distributor => ({
+        "ID": distributor.id,
+        "First Name": distributor.first_name,
+        "Last Name": distributor.last_name,
+        "CIN": distributor.cin,
+        "Email": distributor.email,
+        "Phone": distributor.phone,
+        "City": distributor.city,
+        "Region": distributor.region,
+        "Status": distributor.disponible ? "Available" : "Unavailable",
+        "Address": distributor.adresse,
+        "Delivery Count": distributor.nomber_livraisons
+      }));
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Distributors");
+
+      // Generate filename based on filters
+      let filename = "distributors";
+      if (statusFilter !== "all") {
+        filename += `_${statusFilter}`;
+      }
+      if (cityFilter !== "all") {
+        filename += `_${cityFilter}`;
+      }
+      if (searchQuery) {
+        filename += `_search_${searchQuery.substring(0, 10)}`;
+      }
+      filename += ".xlsx";
+
+      // Export the file
+      XLSX.writeFile(workbook, filename);
+
+      toast.success("Export Successful", {
+        description: `Exported ${filteredDistributors.length} distributors to Excel file.`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Export Failed", {
+        description: "An error occurred while exporting the data.",
+      });
+    }finally{
+      setIsExporting(false);
+    }
   };
 
   const updateAvailability = async (distributorId, isAvailable) => {
@@ -424,18 +474,6 @@ export default function DistributorManagement() {
                                 <Eye className="h-4 w-4" />
                               </Link>
                             </Button>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              asChild
-                              className="hover:bg-muted"
-                            >
-                              <Link to={`/admin/livreurs/${distributor.id}/edit`} aria-label="Edit">
-                                <Edit className="h-4 w-4" />
-                              </Link>
-                            </Button>
-
                             <Button
                               variant="ghost"
                               size="icon"

@@ -65,7 +65,6 @@ export const AuthProvider = ({ children }) => {
     // Logout user
     const logout = async () => {
         setLoading(true);
-        alert("ok")
         try {
             if (token) {
                 await axios.post('/logout');
