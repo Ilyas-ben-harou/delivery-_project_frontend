@@ -17,7 +17,7 @@ import ClientLayout from "./components/layouts/ClientLayout";
 import LivreurLayout from "./components/layouts/LivreurLayout";
 
 // Auth middleware
-import { requireAuth, requireRole } from "./middleware/auth";
+import {  requireRole } from "./middleware/auth";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import Register from "./components/auth/Register";
 // profiles
@@ -28,6 +28,11 @@ import LivreurRegister from "./components/admin/livreurs/LivreurRegister";
 import LivreurListing from "./components/admin/livreurs/LivreurListing";
 import LivreurDetail from "./components/admin/livreurs/LivreurDetail"
 
+//client actions
+import CreateOrder from "./components/client/CreateOrder";
+import OrdersList from "./components/client/OrdersList";
+
+
 
 import ClientManagement from "./components/admin/ClientManagement";
 import FinanceReportPage from "./components/admin/FinanceReportPage";
@@ -35,6 +40,8 @@ import OrdersManagement from "./components/admin/OrdersManagement";
 import RapportsFinances from "./components/admin/FinanceReportPage";
 import RapportsPerformance from "./components/admin/rapports-performance";
 import Home from "./components/home/Home";
+
+
 
 const router = createBrowserRouter([
   // Public routes
@@ -120,6 +127,9 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: <ClientDashboard />,
       },
+      { path: 'orders', element: <OrdersList /> },
+      { path: 'orders/create', element: <CreateOrder /> },
+      
       // Add more client routes here
     ],
   },

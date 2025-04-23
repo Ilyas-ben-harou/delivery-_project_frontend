@@ -20,7 +20,7 @@ const ClientLayout = () => {
                     <ul>
                         <li><a href="/client/dashboard">Dashboard</a></li>
                         <li><a href="/client/orders">My Orders</a></li>
-                        <li><a href="/client/new-order">New Order</a></li>
+                        <li><a href="/client/orders/create">New Order</a></li>
                         <li><a href="/client/documents">Documents</a></li>
                     </ul>
                 </nav>
