@@ -11,14 +11,18 @@ import { Label } from "../../ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
 import { Separator } from "../../ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
-import { Loader2 } from "lucide-react"
+import { Loader2, CheckCircle2, Circle } from "lucide-react"
 import { adminAxios } from "../../../api/axios"
+
+// Don't use the Popover component since it might be causing issues
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../ui/dialog"
 
 export default function LivreurRegister() {
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [zones, setZones] = useState([])
+  const [isZoneDialogOpen, setIsZoneDialogOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -26,7 +30,7 @@ export default function LivreurRegister() {
     telephone: "",
     email: "",
     cin: "",
-    zone_geographic_id: "",
+    zone_geographic_ids: [],
     adresse: "",
     disponible: true,
     password: "",
@@ -36,21 +40,38 @@ export default function LivreurRegister() {
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    const fetchZones = async () => {
-      try {
-        const response = await adminAxios.get('/zone-geographics')
-        console.log(response.data.data)
-        setZones(response.data.data || response.data)
-      } catch (error) {
-        console.error("Erreur:", error)
-        toast.error("Impossible de charger les zones géographiques. Veuillez réessayer.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchZones()
   }, [])
+
+  const fetchZones = async () => {
+    try {
+      setIsLoading(true)
+      console.log("Fetching zones...")
+      const response = await adminAxios.get('/zone-geographics')
+      
+      // Debug log the raw response
+      console.log("API Response:", response)
+      
+      let zonesData = []
+      
+      if (Array.isArray(response.data)) {
+        zonesData = response.data
+      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        zonesData = response.data.data
+      } else if (response.data && typeof response.data === 'object') {
+        // In case the response structure is unexpected, try to extract anything that looks like zones
+        zonesData = Object.values(response.data).find(val => Array.isArray(val)) || []
+      }
+      
+      console.log("Processed zones data:", zonesData)
+      setZones(zonesData)
+    } catch (error) {
+      console.error("Error fetching zones:", error)
+      toast.error("Impossible de charger les zones géographiques. Veuillez réessayer.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -64,6 +85,20 @@ export default function LivreurRegister() {
     setFormData(prev => ({ ...prev, [name]: value }))
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
+    }
+  }
+
+  const toggleZone = (zoneId) => {
+    setFormData(prev => {
+      const newZoneIds = prev.zone_geographic_ids.includes(zoneId)
+        ? prev.zone_geographic_ids.filter(id => id !== zoneId)
+        : [...prev.zone_geographic_ids, zoneId]
+      
+      return { ...prev, zone_geographic_ids: newZoneIds }
+    })
+    
+    if (errors.zone_geographic_ids) {
+      setErrors(prev => ({ ...prev, zone_geographic_ids: undefined }))
     }
   }
 
@@ -88,8 +123,8 @@ export default function LivreurRegister() {
       newErrors.cin = "Format CIN invalide (ex: AB12345)"
     }
 
-    if (!formData.zone_geographic_id) {
-      newErrors.zone_geographic_id = "Zone géographique requise"
+    if (!formData.zone_geographic_ids || formData.zone_geographic_ids.length === 0) {
+      newErrors.zone_geographic_ids = "Au moins une zone est requise"
     }
 
     if (formData.password.length < 8) {
@@ -109,11 +144,13 @@ export default function LivreurRegister() {
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors)
+      toast.error("Formulaire incomplet", { 
+        description: "Veuillez corriger les erreurs signalées avant de soumettre."
+      })
       return
     }
 
     setIsSubmitting(true)
-
     try {
       await adminAxios.post('/livreurs', formData)
       toast.success(
@@ -132,13 +169,20 @@ export default function LivreurRegister() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Chargement des données...</span>
-      </div>
-    )
+  const getZoneDisplayName = (zone) => {
+    if (!zone) return "Zone inconnue";
+    
+    if (zone.city && zone.secteur) {
+      return `${zone.city.trim()}, ${zone.secteur.trim()}`;
+    }
+    
+    if (zone.name) return zone.name;
+    
+    if (zone.city) return zone.city.trim();
+    
+    if (zone.secteur) return zone.secteur.trim();
+    
+    return `Zone ${zone.id}`;
   }
 
   return (
@@ -155,11 +199,19 @@ export default function LivreurRegister() {
             variant="outline"
             onClick={() => navigate("/admin/livreurs")}
             disabled={isSubmitting}
+            type="button"
           >
             Annuler
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Création en cours..." : "Créer le livreur"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Création en cours...
+              </>
+            ) : (
+              "Créer le livreur"
+            )}
           </Button>
         </div>
       </div>
@@ -177,7 +229,7 @@ export default function LivreurRegister() {
               <CardDescription>Entrez les informations personnelles du livreur.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="last_name">Nom <span className="text-red-500">*</span></Label>
                   <Input
@@ -186,6 +238,7 @@ export default function LivreurRegister() {
                     value={formData.last_name}
                     onChange={handleChange}
                     className={errors.last_name ? "border-red-500" : ""}
+                    placeholder="Nom de famille"
                   />
                   {errors.last_name && <p className="text-sm text-red-500">{errors.last_name}</p>}
                 </div>
@@ -197,12 +250,13 @@ export default function LivreurRegister() {
                     value={formData.first_name}
                     onChange={handleChange}
                     className={errors.first_name ? "border-red-500" : ""}
+                    placeholder="Prénom"
                   />
                   {errors.first_name && <p className="text-sm text-red-500">{errors.first_name}</p>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="telephone">Téléphone <span className="text-red-500">*</span></Label>
                   <Input
@@ -211,6 +265,7 @@ export default function LivreurRegister() {
                     value={formData.telephone}
                     onChange={handleChange}
                     className={errors.telephone ? "border-red-500" : ""}
+                    placeholder="+212 ou 0 suivi de 9 chiffres"
                   />
                   {errors.telephone && <p className="text-sm text-red-500">{errors.telephone}</p>}
                 </div>
@@ -223,6 +278,7 @@ export default function LivreurRegister() {
                     value={formData.email}
                     onChange={handleChange}
                     className={errors.email ? "border-red-500" : ""}
+                    placeholder="exemple@domaine.com"
                   />
                   {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                 </div>
@@ -236,42 +292,95 @@ export default function LivreurRegister() {
                   value={formData.cin}
                   onChange={handleChange}
                   className={errors.cin ? "border-red-500" : ""}
+                  placeholder="Ex: AB12345"
                 />
                 {errors.cin && <p className="text-sm text-red-500">{errors.cin}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="zone_geographic_id">Zone géographique <span className="text-red-500">*</span></Label>
-                  <Select
-                    value={formData.zone_geographic_id}
-                    onValueChange={(value) => handleSelectChange("zone_geographic_id", value)}
-                  >
-                    <SelectTrigger className={errors.zone_geographic_id ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Sélectionner une zone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {zones.length > 0 ? (
-                        zones.map(zone => (
-                          <SelectItem
-                            key={zone.id}
-                            value={zone.id.toString()} // Ensure this is never empty
+                  <Label>Zones géographiques <span className="text-red-500">*</span></Label>
+                  
+                  {/* Use Dialog instead of Popover for better control */}
+                  <Dialog open={isZoneDialogOpen} onOpenChange={setIsZoneDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        type="button"
+                        className={`w-full justify-start text-left font-normal ${errors.zone_geographic_ids ? "border-red-500" : ""}`}
+                      >
+                        {formData.zone_geographic_ids.length > 0
+                          ? `${formData.zone_geographic_ids.length} zone(s) sélectionnée(s)`
+                          : "Sélectionner des zones"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Sélectionner des zones géographiques</DialogTitle>
+                      </DialogHeader>
+                      
+                      {isLoading ? (
+                        <div className="flex items-center justify-center p-4">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          <span className="ml-2">Chargement des zones...</span>
+                        </div>
+                      ) : zones.length === 0 ? (
+                        <div className="p-4 text-center">
+                          <p>Aucune zone disponible.</p>
+                          <Button 
+                            onClick={fetchZones} 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
                           >
-                            {`${zone.city.trim()}, ${zone.region.trim()}`}
-                          </SelectItem>
-                        ))
+                            Réessayer
+                          </Button>
+                        </div>
                       ) : (
-                        <SelectItem
-                          value="no-zones" // Changed from empty string to a non-empty value
-                          disabled
-                        >
-                          Aucune zone disponible
-                        </SelectItem>
+                        <div className="max-h-72 overflow-y-auto">
+                          {zones.map((zone) => (
+                            <div 
+                              key={zone.id} 
+                              className="flex items-center p-3 cursor-pointer hover:bg-slate-100 border-b"
+                              onClick={() => toggleZone(zone.id)}
+                            >
+                              {formData.zone_geographic_ids.includes(zone.id) ? (
+                                <CheckCircle2 className="h-5 w-5 text-primary mr-2" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-muted-foreground mr-2" />
+                              )}
+                              <span>{getZoneDisplayName(zone)}</span>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    </SelectContent>
-                  </Select>
-                  {errors.zone_geographic_id && (
-                    <p className="text-sm text-red-500">{errors.zone_geographic_id}</p>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          type="button"
+                          onClick={() => setIsZoneDialogOpen(false)}
+                        >
+                          Confirmer ({formData.zone_geographic_ids.length} sélectionnée(s))
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {formData.zone_geographic_ids.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {formData.zone_geographic_ids.map(zoneId => {
+                        const zone = zones.find(z => z.id === zoneId);
+                        return (
+                          <div key={zoneId} className="bg-primary/10 text-primary text-xs rounded-full px-2 py-1">
+                            {zone ? getZoneDisplayName(zone) : `Zone ${zoneId}`}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
+                  {errors.zone_geographic_ids && (
+                    <p className="text-sm text-red-500">{errors.zone_geographic_ids}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -281,6 +390,7 @@ export default function LivreurRegister() {
                     name="adresse"
                     value={formData.adresse}
                     onChange={handleChange}
+                    placeholder="Adresse complète"
                   />
                 </div>
               </div>
@@ -311,7 +421,7 @@ export default function LivreurRegister() {
                 </Select>
               </div>
 
-              <Separator />
+              <Separator className="my-2" />
 
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe <span className="text-red-500">*</span></Label>
@@ -322,6 +432,7 @@ export default function LivreurRegister() {
                   value={formData.password}
                   onChange={handleChange}
                   className={errors.password ? "border-red-500" : ""}
+                  placeholder="Minimum 8 caractères"
                 />
                 {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </div>
@@ -337,6 +448,7 @@ export default function LivreurRegister() {
                   value={formData.password_confirmation}
                   onChange={handleChange}
                   className={errors.password_confirmation ? "border-red-500" : ""}
+                  placeholder="Répétez le mot de passe"
                 />
                 {errors.password_confirmation && (
                   <p className="text-sm text-red-500">{errors.password_confirmation}</p>

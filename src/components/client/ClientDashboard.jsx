@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 
 const ClientDashboard = () => {
   
@@ -9,7 +10,13 @@ const ClientDashboard = () => {
         <div className="dashboard-card">
           <h3>Create Order</h3>
           <p>Create a new delivery order for your products.</p>
-          <button className="btn btn-primary">New Order</button>
+          
+          <Link 
+            to="/client/orders/create" 
+            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Create Order
+          </Link>
         </div>
         
         <div className="dashboard-card">

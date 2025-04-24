@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ChevronLeft, Edit, Trash, Check, X } from "lucide-react";
+import { ChevronLeft, Edit, Trash, Check, X, MapPin, Truck } from "lucide-react";
 import { toast } from "sonner";
 
 // API
@@ -24,32 +24,32 @@ import {
   AlertDialogTitle,
 } from "../../ui/alert-dialog";
 
-export default function DistributorDetail() {
+export default function LivreurDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [distributor, setDistributor] = useState(null);
+  const [livreur, setLivreur] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Fetch distributor data
+  // Fetch livreur data
   useEffect(() => {
-    const fetchDistributorData = async () => {
+    const fetchLivreurData = async () => {
       setIsLoading(true);
       try {
         const response = await adminAxios.get(`/livreurs/${id}`);
         
-        if (response.data?.data) {
-          setDistributor(response.data.data);
+        if (response.data?.status === 'success') {
+          setLivreur(response.data.data);
           setError(null);
         } else {
-          throw new Error("No data found in response");
+          throw new Error(response.data?.message || "No data found in response");
         }
       } catch (error) {
-        console.error("Error fetching distributor details:", error);
-        setError("Failed to load distributor details. Please try again later.");
-        toast.error("Failed to load distributor", {
-          description: "Could not retrieve distributor details from the server.",
+        console.error("Error fetching livreur details:", error);
+        setError(error.response?.data?.message || "Failed to load livreur details. Please try again later.");
+        toast.error("Failed to load livreur", {
+          description: error.response?.data?.message || "Could not retrieve livreur details from the server.",
         });
       } finally {
         setIsLoading(false);
@@ -57,7 +57,7 @@ export default function DistributorDetail() {
     };
 
     if (id) {
-      fetchDistributorData();
+      fetchLivreurData();
     }
   }, [id]);
 
@@ -85,22 +85,22 @@ export default function DistributorDetail() {
   };
 
   /**
-   * Deletes the current distributor
+   * Deletes the current livreur
    */
-  const handleDeleteDistributor = async () => {
+  const handleDeleteLivreur = async () => {
     try {
       setIsLoading(true);
       await adminAxios.delete(`/livreurs/${id}`);
       
-      toast.success("Distributor deleted successfully", {
-        description: `${distributor.first_name} ${distributor.last_name} has been removed from the system.`,
+      toast.success("Delivery agent deleted successfully", {
+        description: `${livreur.first_name} ${livreur.last_name} has been removed from the system.`,
       });
       
       navigate('/admin/livreurs');
     } catch (error) {
-      console.error("Error deleting distributor:", error);
-      toast.error("Failed to delete distributor", {
-        description: "An error occurred while attempting to delete the distributor.",
+      console.error("Error deleting delivery agent:", error);
+      toast.error("Failed to delete delivery agent", {
+        description: error.response?.data?.message || "An error occurred while attempting to delete the delivery agent.",
       });
     } finally {
       setIsLoading(false);
@@ -109,12 +109,12 @@ export default function DistributorDetail() {
   };
 
   /**
-   * Toggles the availability status of the distributor
+   * Toggles the availability status of the livreur
    */
   const toggleAvailability = async () => {
-    if (!distributor) return;
+    if (!livreur) return;
     
-    const newStatus = distributor.disponible === 1 ? 0 : 1;
+    const newStatus = livreur.disponible === 1 ? 0 : 1;
     
     try {
       setIsLoading(true);
@@ -122,7 +122,7 @@ export default function DistributorDetail() {
         disponible: newStatus
       });
       
-      setDistributor(prev => ({
+      setLivreur(prev => ({
         ...prev,
         disponible: newStatus
       }));
@@ -130,7 +130,7 @@ export default function DistributorDetail() {
       toast.success(
         `Availability status updated`,
         {
-          description: `Distributor is now ${newStatus === 1 ? 'available' : 'unavailable'} for deliveries.`,
+          description: `Delivery agent is now ${newStatus === 1 ? 'available' : 'unavailable'} for deliveries.`,
           action: {
             label: "Undo",
             onClick: () => toggleAvailability(),
@@ -140,7 +140,7 @@ export default function DistributorDetail() {
     } catch (error) {
       console.error("Error updating availability:", error);
       toast.error("Failed to update availability", {
-        description: "Could not update the distributor's availability status.",
+        description: error.response?.data?.message || "Could not update the delivery agent's availability status.",
       });
     } finally {
       setIsLoading(false);
@@ -201,20 +201,20 @@ export default function DistributorDetail() {
   }
 
   // Error state
-  if (error || !distributor) {
+  if (error || !livreur) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <div className="bg-destructive/10 p-4 rounded-lg text-center max-w-md">
-          <XCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+          <X className="h-8 w-8 text-destructive mx-auto mb-2" />
           <h3 className="text-lg font-medium text-destructive mb-2">
-            {error || "Distributor not found"}
+            {error || "Delivery agent not found"}
           </h3>
           <p className="text-muted-foreground mb-4">
-            We couldn't load the distributor details. Please check the ID and try again.
+            We couldn't load the delivery agent details. Please check the ID and try again.
           </p>
           <Button asChild>
             <Link to="/admin/livreurs">
-              Back to Distributors
+              Back to delivery agents
             </Link>
           </Button>
         </div>
@@ -222,7 +222,8 @@ export default function DistributorDetail() {
     );
   }
 
-  const isAvailable = distributor.disponible === 1;
+  const isAvailable = livreur.disponible === 1;
+  const zones = livreur.zones || [];
 
   return (
     <div className="space-y-6">
@@ -230,16 +231,16 @@ export default function DistributorDetail() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
-            <Link to="/admin/livreurs" aria-label="Back to distributors">
+            <Link to="/admin/livreurs" aria-label="Back to delivery agents">
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Distributor Details
+              Delivery Agent Details
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage and view details for {distributor.first_name} {distributor.last_name}
+              Manage and view details for {livreur.first_name} {livreur.last_name}
             </p>
           </div>
         </div>
@@ -285,18 +286,18 @@ export default function DistributorDetail() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 bg-muted/50 rounded-lg">
         <div className="h-20 w-20 rounded-full bg-background border flex items-center justify-center">
           <span className="text-2xl font-medium">
-            {distributor.first_name?.charAt(0)?.toUpperCase()}
-            {distributor.last_name?.charAt(0)?.toUpperCase()}
+            {livreur.first_name?.charAt(0)?.toUpperCase()}
+            {livreur.last_name?.charAt(0)?.toUpperCase()}
           </span>
         </div>
         
         <div className="space-y-1">
           <h2 className="text-2xl font-semibold">
-            {distributor.first_name} {distributor.last_name}
+            {livreur.first_name} {livreur.last_name}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm text-muted-foreground">ID: {distributor.id}</p>
-            <p className="text-sm text-muted-foreground">CIN: {distributor.cin}</p>
+            <p className="text-sm text-muted-foreground">ID: {livreur.id}</p>
+            <p className="text-sm text-muted-foreground">CIN: {livreur.cin}</p>
             <Badge 
               variant={isAvailable ? "available" : "unavailable"}
               className={isAvailable 
@@ -320,11 +321,11 @@ export default function DistributorDetail() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <InfoRow label="Full Name" value={`${distributor.first_name} ${distributor.last_name}`} />
-            <InfoRow label="CIN" value={distributor.cin} />
-            <InfoRow label="Email" value={distributor.user?.email} />
-            <InfoRow label="Phone" value={distributor.user?.phone_number} />
-            <InfoRow label="Address" value={distributor.adresse} />
+            <InfoRow label="Full Name" value={`${livreur.first_name} ${livreur.last_name}`} />
+            <InfoRow label="CIN" value={livreur.cin} />
+            <InfoRow label="Email" value={livreur.user?.email} />
+            <InfoRow label="Phone" value={livreur.user?.phone_number} />
+            <InfoRow label="Address" value={livreur.adresse} />
           </CardContent>
         </Card>
 
@@ -334,32 +335,58 @@ export default function DistributorDetail() {
             <CardTitle>Account Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <InfoRow label="Distributor ID" value={distributor.id} />
-            <InfoRow label="User ID" value={distributor.user_id} />
+            <InfoRow label="Delivery Agent ID" value={livreur.id} />
+            <InfoRow label="User ID" value={livreur.user_id} />
             <InfoRow 
               label="Role" 
-              value={distributor.user?.role ? capitalizeFirstLetter(distributor.user.role) : "N/A"} 
+              value={livreur.user?.role ? capitalizeFirstLetter(livreur.user.role) : "N/A"} 
             />
-            <InfoRow label="Created On" value={formatDate(distributor.created_at)} />
-            <InfoRow label="Last Updated" value={formatDate(distributor.updated_at)} />
+            <InfoRow label="Created On" value={formatDate(livreur.created_at)} />
+            <InfoRow label="Last Updated" value={formatDate(livreur.updated_at)} />
           </CardContent>
         </Card>
 
         {/* Delivery Information Card */}
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>Delivery Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              <span>Delivery Information</span>
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <InfoRow label="Geographical Zone" value={distributor.zone_goegraphic?.region} />
-            <InfoRow label="City" value={distributor.zone_goegraphic?.city} />
+            <InfoRow label="Vehicle Type" value={livreur.vehicule_type} />
             <InfoRow 
               label="Delivery Status" 
               value={isAvailable ? "Available for deliveries" : "Currently unavailable"} 
             />
-            <InfoRow label="Vehicle Type" value={distributor.vehicule_type} />
-            <InfoRow label="Zone ID" value={distributor.zone_id} />
-            <InfoRow label="Orders Completed" value={distributor.orders_count || 0} />
+            <InfoRow label="Orders Completed" value={livreur.orders_count || 0} />
+            
+            {/* Zones Information */}
+            <div className="md:col-span-3">
+              <div className="text-sm font-medium text-muted-foreground mb-2">Assigned Zones</div>
+              {zones.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {zones.map((zone) => (
+                    <div key={zone.id} className="border rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <h4 className="font-medium">{zone.secteur}</h4>
+                      </div>
+                      <div className="space-y-1 text-sm">
+                        <div><span className="text-muted-foreground">City:</span> {zone.city}</div>
+                        <div><span className="text-muted-foreground">Postal Code:</span> {zone.postal_code}</div>
+                        <div><span className="text-muted-foreground">Zone ID:</span> {zone.id}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground italic">
+                  No zones assigned to this delivery agent
+                </div>
+              )}
+            </div>
           </CardContent>
           <CardFooter>
             <Button variant="outline" asChild className="w-full">
@@ -379,14 +406,15 @@ export default function DistributorDetail() {
               Confirm Deletion
             </AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to permanently delete the distributor account for{" "}
+              You are about to permanently delete the delivery agent account for{" "}
               <span className="font-semibold">
-                {distributor.first_name} {distributor.last_name}
+                {livreur.first_name} {livreur.last_name}
               </span>. This will:
               <ul className="list-disc pl-5 mt-2 space-y-1">
                 <li>Remove all associated data</li>
                 <li>Cancel any pending deliveries</li>
                 <li>Revoke system access immediately</li>
+                <li>Remove from all assigned zones</li>
               </ul>
               <p className="mt-3 font-medium">This action cannot be undone.</p>
             </AlertDialogDescription>
@@ -394,11 +422,11 @@ export default function DistributorDetail() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDeleteDistributor}
+              onClick={handleDeleteLivreur}
               className="bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive"
               disabled={isLoading}
             >
-              {isLoading ? "Deleting..." : "Delete Distributor"}
+              {isLoading ? "Deleting..." : "Delete Delivery Agent"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
