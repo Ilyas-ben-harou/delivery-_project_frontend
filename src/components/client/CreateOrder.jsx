@@ -1,7 +1,7 @@
 // src/components/client/CreateOrder.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {  clientAxios } from '../../api/axios';
+import { clientAxios } from '../../api/axios';
 import { toast } from 'sonner'
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -27,6 +27,7 @@ const CreateOrder = () => {
     amount: '',
     client_id:''
   });
+  
   const createOrder = async (orderData) => {
     try {
       const response = await clientAxios.post('/orders', orderData);
@@ -39,7 +40,6 @@ const CreateOrder = () => {
   const getZoneGeographics = async () => {
     try {
       const response = await clientAxios.get('/zone-geographics');
-      console.log("zones:", response.data);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'An error occurred while fetching zones' };
@@ -50,9 +50,6 @@ const CreateOrder = () => {
     const fetchZones = async () => {
       try {
         const response = await clientAxios.get('/zone-geographics');
-        // Add debugging logs
-        console.log("Full response:", response);
-        // Use only response.data.data since that's how backend structures it
         setZones(response.data.data);
       } catch (error) {
         console.error("Error details:", error.response || error);
@@ -63,9 +60,11 @@ const CreateOrder = () => {
     };
 
     fetchZones();
-}, []);
+  }, []);
 
-useEffect(()=>{setFormData({...formData,client_id:user.client.id})},[user])
+  useEffect(() => {
+    setFormData({...formData, client_id: user?.client?.id || ''});
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,10 +79,16 @@ useEffect(()=>{setFormData({...formData,client_id:user.client.id})},[user])
     setLoading(true);
     setErrorMessage('');
     
-
     try {
-      console.log(formData)
-      await createOrder(formData);
+      const response = await createOrder(formData);
+      
+      // Show different toast messages based on assignment status
+      if (response.assigned) {
+        toast.success('Order created and assigned to a deliverer successfully!');
+      } else {
+        toast.success('Order created successfully! No available deliverer was found in this zone.');
+      }
+      
       navigate('/client/orders');
     } catch (error) {
       setErrorMessage(error.message || 'Failed to create order. Please try again.');
@@ -92,6 +97,14 @@ useEffect(()=>{setFormData({...formData,client_id:user.client.id})},[user])
       setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-4">
@@ -182,6 +195,9 @@ useEffect(()=>{setFormData({...formData,client_id:user.client.id})},[user])
                   </option>
                 ))}
               </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Orders are automatically assigned to available deliverers in this zone
+              </p>
             </div>
           </div>
         </div>
