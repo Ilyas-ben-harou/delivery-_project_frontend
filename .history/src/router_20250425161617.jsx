@@ -40,7 +40,6 @@ import OrdersManagement from "./components/admin/orders/OrdersManagement";
 import RapportsFinances from "./components/admin/FinanceReportPage";
 import RapportsPerformance from "./components/admin/rapports-performance";
 import Home from "./components/home/Home";
-import DetailOrder from "./components/client/DetailOrder";
 
 
 
@@ -130,7 +129,7 @@ const router = createBrowserRouter([
       },
       { path: 'orders', element: <OrdersList /> },
       { path: 'orders/create', element: <CreateOrder /> },
-      { path: 'orders/:id', element: <DetailOrder /> },
+      { path: 'orders/create', element: <CreateOrder /> },
       
       // Add more client routes here
     ],

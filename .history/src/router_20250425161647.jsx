@@ -130,7 +130,7 @@ const router = createBrowserRouter([
       },
       { path: 'orders', element: <OrdersList /> },
       { path: 'orders/create', element: <CreateOrder /> },
-      { path: 'orders/:id', element: <DetailOrder /> },
+      { path: 'orders/', element: <DetailOrder /> },
       
       // Add more client routes here
     ],
