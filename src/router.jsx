@@ -41,6 +41,7 @@ import RapportsFinances from "./components/admin/FinanceReportPage";
 import RapportsPerformance from "./components/admin/rapports-performance";
 import Home from "./components/home/Home";
 import DetailOrder from "./components/client/DetailOrder";
+import OrderDetail from "./components/admin/orders/OrderDetail";
 
 
 
@@ -107,6 +108,11 @@ const router = createBrowserRouter([
         path: "orders",
         element: <OrdersManagement />,
       },
+      {
+        path: "orders/:id",
+        element: <OrderDetail />,
+      },
+      
       {
         path: "reports",
         element: <RapportsFinances />,
