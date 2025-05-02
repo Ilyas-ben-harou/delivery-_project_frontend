@@ -114,6 +114,21 @@ export default function AdminSidebar({ children, onLogout }) {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        location.pathname === "/admin/zones" || location.pathname.startsWith("/admin/zones/")
+                      }
+                      className="hover:bg-gray-100 rounded-lg"
+                    >
+                      <Link to="/admin/zones" className="flex items-center gap-3 px-3 py-2">
+                        <User className="h-5 w-5 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">Zones</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

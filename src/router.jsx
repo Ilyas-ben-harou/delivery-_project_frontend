@@ -48,6 +48,7 @@ import RapportsPerformance from "./components/admin/rapports-performance";
 import Home from "./components/home/Home";
 import DetailOrder from "./components/client/DetailOrder";
 import OrderDetail from "./components/admin/orders/OrderDetail";
+import ZoneManagement from "./components/admin/zones/ZoneManagement";
 
 
 
@@ -129,6 +130,11 @@ const router = createBrowserRouter([
       {
         path: "orders/:id",
         element: <OrderDetail />,
+      },
+
+      {
+        path: "zones",
+        element: <ZoneManagement />,
       },
       
       {
