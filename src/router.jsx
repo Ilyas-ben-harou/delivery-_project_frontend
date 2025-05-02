@@ -33,8 +33,14 @@ import CreateOrder from "./components/client/CreateOrder";
 import OrdersList from "./components/client/OrdersList";
 
 
+//admin gestion clients
+import ClientListing from "./components/admin/clients/ClientListing";
+import ClientRegister from "./components/admin/clients/ClientRegister";
+import ClientDetail from "./components/admin/clients/ClientDetail";
+import ClientUpdate from "./components/admin/clients/ClientUpdate";
 
-import ClientManagement from "./components/admin/ClientManagement";
+
+
 import FinanceReportPage from "./components/admin/FinanceReportPage";
 import OrdersManagement from "./components/admin/orders/OrdersManagement";
 import RapportsFinances from "./components/admin/FinanceReportPage";
@@ -102,7 +108,19 @@ const router = createBrowserRouter([
       },
       {
         path: "clients",
-        element: <ClientManagement />,
+        element: <ClientListing />,
+      },
+      {
+        path: "clients/create",
+        element: <ClientRegister />,
+      },
+      {
+        path: "clients/:id",
+        element: <ClientDetail />,
+      },
+      {
+        path: "/admin/clients/:id/edit",
+        element: <ClientUpdate />,
       },
       {
         path: "orders",
