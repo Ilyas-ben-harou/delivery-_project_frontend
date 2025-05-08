@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, [token]);
 
-    
+
 
     // Login user with remember me
     const login = async (credentials) => {
@@ -62,6 +62,68 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateLivreur = async (data) => {
+        console.log('Updating livreur availability:', data);
+        try {
+            const token = localStorage.getItem('token');
+
+            // Restructure data to match backend expectations
+            const requestData = {
+                disponible: data.disponible,
+            };
+
+            // Only include unavailablePeriod if becoming unavailable
+            if (!data.disponible && data.unavailablePeriod) {
+                requestData.unavailablePeriod = {
+                    start: data.unavailablePeriod.start,
+                    end: data.unavailablePeriod.end,
+                    reason: data.unavailablePeriod.reason
+                };
+            }
+
+            const response = await axios.put('/livreur/update-availability', requestData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Update response:', response.data);
+
+            // Update user data in context and localStorage with the structure expected by your component
+            const updatedLivreur = {
+                ...user.livreur,
+                disponible: data.disponible
+            };
+
+            // Only add unavailablePeriod if becoming unavailable
+            if (!data.disponible && data.unavailablePeriod) {
+                updatedLivreur.unavailablePeriod = {
+                    start: data.unavailablePeriod.start,
+                    end: data.unavailablePeriod.end,
+                    reason: data.unavailablePeriod.reason
+                };
+            } else {
+                // Explicitly remove unavailablePeriod when becoming available
+                updatedLivreur.unavailablePeriod = null;
+            }
+
+            // Update localStorage
+            const updatedUser = {
+                ...user,
+                livreur: updatedLivreur
+            };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            // Update context
+            setUser(updatedUser);
+
+            return response.data;
+        } catch (error) {
+            console.error('Error updating availability:', error);
+            throw error.response?.data || error;
+        }
+    };
     // Logout user
     const logout = async () => {
         setLoading(true);
@@ -97,6 +159,7 @@ export const AuthProvider = ({ children }) => {
         error,
         login,
         logout,
+        updateLivreur,
         isAdmin,
         isClient,
         isLivreur,
