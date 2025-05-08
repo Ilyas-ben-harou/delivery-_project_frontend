@@ -34,4 +34,19 @@ clientAxios.interceptors.request.use((config) => {
     return config;
 });
 
-export { adminAxios, clientAxios };
+const livreurAxios = axios.create({
+    baseURL: `${API_URL}/livreur`,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    },
+});
+
+livreurAxios.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+});
+export { adminAxios, clientAxios, livreurAxios };
