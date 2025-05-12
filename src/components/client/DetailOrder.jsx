@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { clientAxios } from "../../api/axios";
+import DeliveryDocumentGenerator from "./DeliveryDocumentGenerator";
 
 const DetailOrder = () => {
   const { id } = useParams();
@@ -9,18 +10,21 @@ const DetailOrder = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDeliveryDocument, setShowDeliveryDocument] = useState(false);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       setLoading(true);
       try {
         const response = await clientAxios.get(`/orders/${id}`);
-        console.log(response.data.data);
         setOrder(response.data.data);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching order details:", err);
-        setError("Failed to fetch order details. Please try again later.");
+        setError(
+          err.response?.data?.message || 
+          "Failed to fetch order details. Please try again later."
+        );
         setLoading(false);
       }
     };
@@ -63,6 +67,11 @@ const DetailOrder = () => {
     navigate(-1);
   };
 
+  // Toggle delivery document section
+  const toggleDeliveryDocument = () => {
+    setShowDeliveryDocument(!showDeliveryDocument);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -79,7 +88,7 @@ const DetailOrder = () => {
         </div>
         <button
           onClick={goBack}
-          className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-150"
+          className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
         >
           Go Back
         </button>
@@ -95,13 +104,18 @@ const DetailOrder = () => {
         </div>
         <button
           onClick={goBack}
-          className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-150"
+          className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
         >
           Go Back
         </button>
       </div>
     );
   }
+
+  // Check if order has all necessary data for document generation
+  const canGenerateDocument = order && 
+    order.customer_info && 
+    order.designation_product;
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -135,7 +149,9 @@ const DetailOrder = () => {
         </span>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Main Order Details */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Order Summary
@@ -375,19 +391,45 @@ const DetailOrder = () => {
           </div>
         )}
       </div>
+        
+        {/* Delivery Document Section */}
+        <div className="p-6 border-t border-gray-200">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Delivery Document
+            </h2>
+            <button
+              onClick={toggleDeliveryDocument}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              {showDeliveryDocument ? "Hide Document Options" : "Generate Document"}
+            </button>
+          </div>
+          
+          {!canGenerateDocument && (
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded">
+              <p>Some required information is missing to generate a complete delivery document.</p>
+              <p className="text-sm mt-1">Please ensure customer information and product details are available.</p>
+            </div>
+          )}
+          
+          {showDeliveryDocument && canGenerateDocument && (
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <DeliveryDocumentGenerator order={order} />
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="mt-6 flex flex-wrap gap-3 justify-end">
         <button
           onClick={goBack}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
         >
           Back to Orders
         </button>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
           Edit Order
-        </button>
-        <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200">
-          Print Invoice
         </button>
       </div>
     </div>

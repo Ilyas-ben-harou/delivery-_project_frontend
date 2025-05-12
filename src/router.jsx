@@ -49,6 +49,9 @@ import Home from "./components/home/Home";
 import DetailOrder from "./components/client/DetailOrder";
 import OrderDetail from "./components/admin/orders/OrderDetail";
 import ZoneManagement from "./components/admin/zones/ZoneManagement";
+import DocumentPreview from "./components/client/DocumentPreview";
+import TrackOrder from "./components/client/TrackOrder";
+import UpdateOrder from "./components/client/UpdateOrder";
 
 
 
@@ -57,6 +60,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
+  },
+  {
+    path: "/track-order/:id",
+    element: <TrackOrder />,
   },
   {
     path: "/login",
@@ -161,6 +168,9 @@ const router = createBrowserRouter([
       { path: 'orders', element: <OrdersList /> },
       { path: 'orders/create', element: <CreateOrder /> },
       { path: 'orders/:id', element: <DetailOrder /> },
+      { path: 'orders/:id/edit', element: <UpdateOrder /> },
+      { path: 'documents', element: <DocumentPreview /> },
+      { path: 'track-order/:id', element: <TrackOrder /> },
       
       // Add more client routes here
     ],
