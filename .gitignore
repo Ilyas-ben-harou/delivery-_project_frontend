@@ -25,3 +25,7 @@ dist-ssr
 # SSH keys
 /.ssh/
 id_ed25519*
+# SSH keys
+/.ssh/
+id_*
+!id_*.pub
