@@ -1,0 +1,19 @@
+# Prevent line ending changes for SSH keys
+id_ed25519 binary
+id_ed25519.pub text
+"*" text=auto
+# Auto-detect line endings for text files
+* text=auto
+
+# Explicitly handle specific files
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip binary
