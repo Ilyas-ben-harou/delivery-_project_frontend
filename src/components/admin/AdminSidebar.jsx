@@ -160,7 +160,7 @@ export default function AdminSidebar({ children, onLogout }) {
                       isActive={location.pathname === "/admin/reports"}
                       className="hover:bg-gray-100 rounded-lg"
                     >
-                      <Link to="/admin/reports" className="flex items-center gap-3 px-3 py-2">
+                      <Link to="/admin/financial" className="flex items-center gap-3 px-3 py-2">
                         <CircleDollarSign className="h-5 w-5 text-gray-600" />
                         <span className="text-sm font-medium text-gray-700">Finances</span>
                       </Link>

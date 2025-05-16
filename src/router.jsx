@@ -52,6 +52,12 @@ import ZoneManagement from "./components/admin/zones/ZoneManagement";
 import DocumentPreview from "./components/client/DocumentPreview";
 import TrackOrder from "./components/client/TrackOrder";
 import UpdateOrder from "./components/client/UpdateOrder";
+import FinancialDashboard from "./components/admin/financial/FinancialDashboard";
+import CityPricingManagement from "./components/admin/financial/CityPricingManagement";
+import DistributorPayments from "./components/admin/financial/DistributorPayments";
+
+import FinancialReports from "./components/admin/financial/FinancialReports";
+import FinancialManagement from "./components/admin/financial/FinancialManagement";
 
 
 
@@ -127,7 +133,7 @@ const router = createBrowserRouter([
         element: <ClientDetail />,
       },
       {
-        path: "/admin/clients/:id/edit",
+        path: "clients/:id/edit",
         element: <ClientUpdate />,
       },
       {
@@ -143,15 +149,34 @@ const router = createBrowserRouter([
         path: "zones",
         element: <ZoneManagement />,
       },
-      
-      {
-        path: "reports",
-        element: <RapportsFinances />,
-      },
       {
         path: "Performance",
         element: <RapportsPerformance />,
       },
+      {
+        path: "financial",
+        element: <FinancialManagement />,
+      },
+      {
+        path: "financial/dashboard",
+        element: <FinancialDashboard />,
+        
+      },
+      {
+        path: "financial/pricing",
+        element: <CityPricingManagement />,
+      },
+      {
+        path: "financial/distributor-payments",
+        element: <DistributorPayments />,
+      },
+      {
+        path: "financial/reports",
+        element: <FinancialReports />,
+      },
+      
+      
+      
     ],
   },
 
