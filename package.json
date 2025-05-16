@@ -28,7 +28,11 @@
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.1.2",
     "axios": "^1.8.4",
+<<<<<<< HEAD
     "chart.js": "^4.4.9",
+=======
+    "bootstrap": "^5.3.6",
+>>>>>>> bb8278e4d75fcb89d38e308480074cfafc2a52b3
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -36,10 +40,16 @@
     "frontend": "file:",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
+    "laravel-echo": "^2.1.4",
     "lucide-react": "^0.487.0",
+    "pusher-js": "^8.4.0",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
+<<<<<<< HEAD
     "react-chartjs-2": "^5.3.0",
+=======
+    "react-bootstrap": "^2.10.10",
+>>>>>>> bb8278e4d75fcb89d38e308480074cfafc2a52b3
     "react-csv": "^2.2.2",
     "react-datepicker": "^8.3.0",
     "react-day-picker": "^9.6.7",

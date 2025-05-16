@@ -52,9 +52,19 @@ import ZoneManagement from "./components/admin/zones/ZoneManagement";
 import DocumentPreview from "./components/client/DocumentPreview";
 import TrackOrder from "./components/client/TrackOrder";
 import UpdateOrder from "./components/client/UpdateOrder";
+<<<<<<< HEAD
 import EarningsDashboard from "./components/livreur/EarningsDashboard";
 import ProfileLivreur from "./components/livreur/Profilelivreur";
 import QRCodeScanner from "./components/livreur/QRCodeScanner";
+=======
+import FinancialDashboard from "./components/admin/financial/FinancialDashboard";
+import CityPricingManagement from "./components/admin/financial/CityPricingManagement";
+import DistributorPayments from "./components/admin/financial/DistributorPayments";
+
+import FinancialReports from "./components/admin/financial/FinancialReports";
+import FinancialManagement from "./components/admin/financial/FinancialManagement";
+import { NotificationProvider } from "./contexts/NotificationContext";
+>>>>>>> bb8278e4d75fcb89d38e308480074cfafc2a52b3
 
 
 
@@ -94,7 +104,7 @@ const router = createBrowserRouter([
   // Admin routes
   {
     path: "/admin",
-    element: <AdminLayout />,
+    element: <NotificationProvider><AdminLayout /></NotificationProvider>,
     loader: () => requireRole("admin"),
     children: [
       {
@@ -130,7 +140,7 @@ const router = createBrowserRouter([
         element: <ClientDetail />,
       },
       {
-        path: "/admin/clients/:id/edit",
+        path: "clients/:id/edit",
         element: <ClientUpdate />,
       },
       {
@@ -146,15 +156,34 @@ const router = createBrowserRouter([
         path: "zones",
         element: <ZoneManagement />,
       },
-      
-      {
-        path: "reports",
-        element: <RapportsFinances />,
-      },
       {
         path: "Performance",
         element: <RapportsPerformance />,
       },
+      {
+        path: "financial",
+        element: <FinancialManagement />,
+      },
+      {
+        path: "financial/dashboard",
+        element: <FinancialDashboard />,
+        
+      },
+      {
+        path: "financial/pricing",
+        element: <CityPricingManagement />,
+      },
+      {
+        path: "financial/distributor-payments",
+        element: <DistributorPayments />,
+      },
+      {
+        path: "financial/reports",
+        element: <FinancialReports />,
+      },
+      
+      
+      
     ],
   },
 
@@ -188,19 +217,6 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <LivreurDashboard />,
-      },
-      
-      {
-        path: 'earnings',
-        element: <EarningsDashboard />
-      },
-      {
-        path: 'profile',
-        element: <ProfileLivreur />
-      },
-      {
-        path: 'scan',
-        element: <QRCodeScanner />
       }
       // Add more livreur routes here
     ],

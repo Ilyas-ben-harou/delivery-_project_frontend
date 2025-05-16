@@ -214,10 +214,10 @@ export default function AdminDashboard() {
           link="/admin/clients"
         />
         <QuickLinkCard
-          title="Rapports et statistiques"
+          title="finances"
           description="Consultez les rapports détaillés et les analyses de performance."
           icon={<BarChart3 />}
-          link="/admin/reports"
+          link="/admin/financial"
         />
       </div>
     </div>

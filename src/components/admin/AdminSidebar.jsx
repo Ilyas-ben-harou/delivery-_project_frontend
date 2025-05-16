@@ -22,6 +22,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "../ui/sidebar"
+import { AdminHeader } from "./Header"
 
 export default function AdminSidebar({ children, onLogout }) {
   const location = useLocation()
@@ -128,7 +129,7 @@ export default function AdminSidebar({ children, onLogout }) {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  
+
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -160,7 +161,7 @@ export default function AdminSidebar({ children, onLogout }) {
                       isActive={location.pathname === "/admin/reports"}
                       className="hover:bg-gray-100 rounded-lg"
                     >
-                      <Link to="/admin/reports" className="flex items-center gap-3 px-3 py-2">
+                      <Link to="/admin/financial" className="flex items-center gap-3 px-3 py-2">
                         <CircleDollarSign className="h-5 w-5 text-gray-600" />
                         <span className="text-sm font-medium text-gray-700">Finances</span>
                       </Link>
@@ -237,14 +238,8 @@ export default function AdminSidebar({ children, onLogout }) {
           <header className="flex h-14 items-center gap-4 border-b bg-white px-6 shadow-sm">
             <SidebarTrigger className="text-gray-600 hover:text-gray-900" />
             <div className="flex-1" />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
+            <AdminHeader />
+            <div></div>
           </header>
           <main className="flex-1 overflow-auto p-6 bg-gray-50">{children}</main>
         </div>
