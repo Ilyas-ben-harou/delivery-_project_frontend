@@ -20,19 +20,19 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="font-medium hover:text-yellow-300 transition-colors">
+            <a href="Home" className="font-medium hover:text-yellow-300 transition-colors">
               Home
             </a>
-            <a href="#" className="font-medium hover:text-yellow-300 transition-colors">
+            <a href="Services" className="font-medium hover:text-yellow-300 transition-colors">
               Services
             </a>
-            <a href="#" className="font-medium hover:text-yellow-300 transition-colors">
+            <a href="Pricing" className="font-medium hover:text-yellow-300 transition-colors">
               Pricing
             </a>
-            <a href="#" className="font-medium hover:text-yellow-300 transition-colors">
+            <a href="About Us" className="font-medium hover:text-yellow-300 transition-colors">
               About Us
             </a>
-            <a href="#" className="font-medium hover:text-yellow-300 transition-colors">
+            <a href="Contact" className="font-medium hover:text-yellow-300 transition-colors">
               Contact
             </a>
           </nav>
