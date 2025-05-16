@@ -58,6 +58,7 @@ import DistributorPayments from "./components/admin/financial/DistributorPayment
 
 import FinancialReports from "./components/admin/financial/FinancialReports";
 import FinancialManagement from "./components/admin/financial/FinancialManagement";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 
 
@@ -97,7 +98,7 @@ const router = createBrowserRouter([
   // Admin routes
   {
     path: "/admin",
-    element: <AdminLayout />,
+    element: <NotificationProvider><AdminLayout /></NotificationProvider>,
     loader: () => requireRole("admin"),
     children: [
       {

@@ -6,17 +6,16 @@ import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 
-
 const App = () => {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
-      <Toaster 
-        richColors 
-        position="top-right"
-        expand={true}
-        closeButton
-      />
+        <RouterProvider router={router} />
+        <Toaster
+          richColors
+          position="top-right"
+          expand={true}
+          closeButton
+        />
     </AuthProvider>
   );
 };
