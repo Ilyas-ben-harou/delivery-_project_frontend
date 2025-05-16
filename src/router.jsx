@@ -52,6 +52,9 @@ import ZoneManagement from "./components/admin/zones/ZoneManagement";
 import DocumentPreview from "./components/client/DocumentPreview";
 import TrackOrder from "./components/client/TrackOrder";
 import UpdateOrder from "./components/client/UpdateOrder";
+import EarningsDashboard from "./components/livreur/EarningsDashboard";
+import ProfileLivreur from "./components/livreur/Profilelivreur";
+import QRCodeScanner from "./components/livreur/QRCodeScanner";
 
 
 
@@ -186,6 +189,19 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: <LivreurDashboard />,
       },
+      
+      {
+        path: 'earnings',
+        element: <EarningsDashboard />
+      },
+      {
+        path: 'profile',
+        element: <ProfileLivreur />
+      },
+      {
+        path: 'scan',
+        element: <QRCodeScanner />
+      }
       // Add more livreur routes here
     ],
   },

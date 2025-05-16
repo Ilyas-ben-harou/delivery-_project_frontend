@@ -77,7 +77,7 @@ const LivreurLayout = () => {
                             <div className="text-xl font-bold text-indigo-600">Delivery Livreur</div>
                             <nav className="ml-6 flex space-x-8">
                                 <a href="/livreur/dashboard" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Dashboard</a>
-                                <a href="/livreur/deliveries" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">My Deliveries</a>
+                                <a href="/livreur/earnings" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">My Earnings</a>
                                 <a href="/livreur/scan" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Scan QR</a>
                                 <a href="/livreur/profile" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Profile</a>
                             </nav>
