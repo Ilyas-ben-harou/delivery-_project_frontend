@@ -52,11 +52,6 @@ import ZoneManagement from "./components/admin/zones/ZoneManagement";
 import DocumentPreview from "./components/client/DocumentPreview";
 import TrackOrder from "./components/client/TrackOrder";
 import UpdateOrder from "./components/client/UpdateOrder";
-<<<<<<< HEAD
-import EarningsDashboard from "./components/livreur/EarningsDashboard";
-import ProfileLivreur from "./components/livreur/Profilelivreur";
-import QRCodeScanner from "./components/livreur/QRCodeScanner";
-=======
 import FinancialDashboard from "./components/admin/financial/FinancialDashboard";
 import CityPricingManagement from "./components/admin/financial/CityPricingManagement";
 import DistributorPayments from "./components/admin/financial/DistributorPayments";
@@ -64,7 +59,9 @@ import DistributorPayments from "./components/admin/financial/DistributorPayment
 import FinancialReports from "./components/admin/financial/FinancialReports";
 import FinancialManagement from "./components/admin/financial/FinancialManagement";
 import { NotificationProvider } from "./contexts/NotificationContext";
->>>>>>> bb8278e4d75fcb89d38e308480074cfafc2a52b3
+import EarningsDashboard from "./components/livreur/EarningsDashboard";
+import ProfileLivreur from "./components/livreur/Profilelivreur";
+import QRCodeScanner from "./components/livreur/QRCodeScanner";
 
 
 
@@ -217,6 +214,20 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <LivreurDashboard />,
+      }
+      ,
+      
+      {
+        path: 'earnings',
+        element: <EarningsDashboard />
+      },
+      {
+        path: 'profile',
+        element: <ProfileLivreur />
+      },
+      {
+        path: 'scan',
+        element: <QRCodeScanner />
       }
       // Add more livreur routes here
     ],
