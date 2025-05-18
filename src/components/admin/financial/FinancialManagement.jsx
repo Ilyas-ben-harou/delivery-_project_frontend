@@ -1,9 +1,59 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaChartLine, FaDollarSign, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { adminAxios } from '../../../api/axios';
 
 const FinancialManagement = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    total_earnings: 0,
+    pending_payments: 0,
+    orders_by_status: [],
+    earnings_by_day: []
+  });
+
+  // Add a helper function to safely format numbers
+  const formatNumber = (value) => {
+    const num = Number(value);
+    return isNaN(num) ? '0.00' : num.toFixed(2);
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAxios.get('/financial/dashboard');
+      
+      if (response.data.status === 'success') {
+        setDashboardData(response.data.data);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to fetch dashboard data');
+      console.error('Error fetching dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const getOrdersByStatus = (status) => {
+    const statusData = dashboardData.orders_by_status.find(item => item.status === status);
+    return statusData ? statusData.count : 0;
+  };
 
   return (
     <div className="w-full p-6">
@@ -15,9 +65,11 @@ const FinancialManagement = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Total Revenue</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">$24,568.00</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {formatNumber(dashboardData.total_earnings)} dh
+              </h2>
             </div>
-            <p className="text-xs text-green-600 mt-2">+12.5% from last month</p>
+            <p className="text-xs text-green-600 mt-2">Current Month Revenue</p>
           </div>
           <div className="h-1 bg-blue-500"></div>
         </div>
@@ -26,9 +78,11 @@ const FinancialManagement = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Pending Payments</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">$5,320.00</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {formatNumber(dashboardData.pending_payments)} dh
+              </h2>
             </div>
-            <p className="text-xs text-red-600 mt-2">-2.3% from last month</p>
+            <p className="text-xs text-yellow-600 mt-2">Awaiting Processing</p>
           </div>
           <div className="h-1 bg-yellow-500"></div>
         </div>
@@ -37,9 +91,11 @@ const FinancialManagement = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Completed Orders</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">1,245</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {getOrdersByStatus('delivered')}
+              </h2>
             </div>
-            <p className="text-xs text-green-600 mt-2">+8.7% from last month</p>
+            <p className="text-xs text-green-600 mt-2">Successfully Delivered</p>
           </div>
           <div className="h-1 bg-green-500"></div>
         </div>
@@ -48,9 +104,11 @@ const FinancialManagement = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Failed Orders</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">68</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {getOrdersByStatus('failed')}
+              </h2>
             </div>
-            <p className="text-xs text-red-600 mt-2">-1.2% from last month</p>
+            <p className="text-xs text-red-600 mt-2">Delivery Failed</p>
           </div>
           <div className="h-1 bg-red-500"></div>
         </div>

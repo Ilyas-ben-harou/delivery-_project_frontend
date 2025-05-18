@@ -38,7 +38,35 @@ const FinancialDashboard = () => {
       });
       
       if (response.data && response.data.status === 'success') {
-        setDashboardData(response.data.data);
+        // Process the data to ensure numeric values
+        const data = response.data.data;
+        
+        // Convert string values to numbers as needed
+        if (typeof data.total_earnings === 'string') {
+          data.total_earnings = parseFloat(data.total_earnings);
+        }
+        
+        // Process earnings_by_day to ensure total is numeric
+        if (Array.isArray(data.earnings_by_day)) {
+          data.earnings_by_day = data.earnings_by_day.map(day => ({
+            ...day,
+            total: typeof day.total === 'string' ? parseFloat(day.total) : day.total
+          }));
+        }
+        
+        // Process top_distributors to ensure numbers
+        if (Array.isArray(data.top_distributors)) {
+          data.top_distributors = data.top_distributors.map(distributor => ({
+            ...distributor,
+            total: typeof distributor.total === 'string' ? parseFloat(distributor.total) : distributor.total,
+            total_revenue: typeof distributor.total_revenue === 'string' ? 
+              parseFloat(distributor.total_revenue) : distributor.total_revenue,
+            total_commission: typeof distributor.total_commission === 'string' ? 
+              parseFloat(distributor.total_commission) : distributor.total_commission
+          }));
+        }
+        
+        setDashboardData(data);
       } else {
         throw new Error('Invalid response format from server');
       }
@@ -165,7 +193,11 @@ const FinancialDashboard = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Total Earnings</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">${dashboardData.total_earnings?.toFixed(2) || '0.00'}</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {typeof dashboardData.total_earnings === 'number' 
+                  ? dashboardData.total_earnings.toFixed(2) 
+                  : Number(dashboardData.total_earnings || 0).toFixed(2)} dh
+              </h2>
             </div>
             <p className="text-xs text-gray-500 mt-2">From {dashboardData.period?.start || 'N/A'} to {dashboardData.period?.end || 'N/A'}</p>
           </div>
@@ -176,7 +208,11 @@ const FinancialDashboard = () => {
           <div className="p-6">
             <h6 className="text-sm font-medium text-gray-500 mb-1">Pending Payments</h6>
             <div className="flex items-center">
-              <h2 className="text-3xl font-bold text-gray-800">${dashboardData.pending_payments?.toFixed(2) || '0.00'}</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                {typeof dashboardData.pending_payments === 'number' 
+                  ? dashboardData.pending_payments.toFixed(2) 
+                  : Number(dashboardData.pending_payments || 0).toFixed(2)} dh
+              </h2>
             </div>
             <p className="text-xs text-gray-500 mt-2">Awaiting settlement</p>
           </div>
@@ -217,7 +253,7 @@ const FinancialDashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="date" stroke="#6b7280" />
                   <YAxis stroke="#6b7280" />
-                  <Tooltip formatter={(value) => `$${value?.toFixed(2) || '0.00'}`} />
+                  <Tooltip formatter={(value) => `$${typeof value === 'number' ? value.toFixed(2) : Number(value || 0).toFixed(2)}`} />
                   <Legend />
                   <Line
                     type="monotone"
@@ -269,7 +305,9 @@ const FinancialDashboard = () => {
                         {distributor.count}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        ${distributor.total?.toFixed(2) || '0.00'}
+                        {typeof distributor.total === 'number' 
+                          ? distributor.total.toFixed(2) 
+                          : Number(distributor.total_revenue || distributor.total || 0).toFixed(2)} dh
                       </td>
                     </tr>
                   ))}

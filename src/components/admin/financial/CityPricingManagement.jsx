@@ -18,6 +18,7 @@ const CityPricingManagement = () => {
   const [formData, setFormData] = useState({
     id: null,
     city: '',
+    secteur: '', // Added missing secteur field
     price: ''
   });
   
@@ -49,12 +50,14 @@ const CityPricingManagement = () => {
       setFormData({
         id: pricing.id,
         city: pricing.city,
+        secteur: pricing.secteur || '', // Handle secteur from existing data
         price: pricing.price
       });
     } else {
       setFormData({
         id: null,
         city: '',
+        secteur: '',
         price: ''
       });
     }
@@ -95,16 +98,24 @@ const CityPricingManagement = () => {
     e.preventDefault();
     
     // Validate form
-    if (!formData.city || !formData.price || formData.price <= 0) {
-      setErrorMessage('Please enter a valid city name and price');
+    if (!formData.city || !formData.secteur || !formData.price || formData.price <= 0) {
+      setErrorMessage('Please enter a valid city name, sector and price');
       return;
     }
     
     try {
-      const response = await adminAxios.post('/financial/pricing', {
+      const payload = {
         city: formData.city,
+        secteur: formData.secteur,
         price: parseFloat(formData.price)
-      });
+      };
+      
+      // If we're updating an existing record, include the ID
+      if (formData.id) {
+        payload.id = formData.id;
+      }
+      
+      const response = await adminAxios.post('/financial/pricing', payload);
       
       if (response.data.status === 'success') {
         setSuccessMessage('Pricing updated successfully');
@@ -117,7 +128,7 @@ const CityPricingManagement = () => {
         }, 3000);
       }
     } catch (err) {
-      setErrorMessage('Failed to update pricing');
+      setErrorMessage(err.response?.data?.message || 'Failed to update pricing');
       console.error('Error updating pricing:', err);
     }
   };
@@ -137,15 +148,17 @@ const CityPricingManagement = () => {
           }, 3000);
         }
       } catch (err) {
-        setError('Failed to delete pricing');
+        setError(err.response?.data?.message || 'Failed to delete pricing');
         console.error('Error deleting pricing:', err);
       }
     }
   };
 
   const filteredPricingData = pricingData.filter(item => {
-    // Filter by search term
-    const matchesSearch = item.city.toLowerCase().includes(searchTerm.toLowerCase());
+    // Filter by search term (search in both city and secteur)
+    const matchesSearch = 
+      item.city.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (item.secteur && item.secteur.toLowerCase().includes(searchTerm.toLowerCase()));
     
     // Filter by price range
     const price = parseFloat(item.price);
@@ -178,10 +191,10 @@ const CityPricingManagement = () => {
           <h4 className="text-lg font-medium text-gray-800 mb-4">Search Pricing</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search by City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search by City or Secteur</label>
               <input
                 type="text"
-                placeholder="Search city..."
+                placeholder="Search city or sector..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -270,6 +283,7 @@ const CityPricingManagement = () => {
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Secteur</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -280,7 +294,8 @@ const CityPricingManagement = () => {
                     <tr key={pricing.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pricing.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{pricing.city}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${pricing.price.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{pricing.secteur}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{parseFloat(pricing.price).toFixed(2)} dh</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button 
                           className="text-blue-600 hover:text-blue-900 mr-3"
@@ -299,7 +314,7 @@ const CityPricingManagement = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
                       {pricingData.length === 0 ? 'No pricing data available' : 'No matching pricing found'}
                     </td>
                   </tr>
@@ -332,7 +347,20 @@ const CityPricingManagement = () => {
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                placeholder="e.g. New York"
+                placeholder="e.g. Rabat"
+                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">Secteur</Form.Label>
+              <Form.Control
+                type="text"
+                name="secteur"
+                value={formData.secteur}
+                onChange={handleInputChange}
+                placeholder="e.g. Agdal"
                 className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 required
               />

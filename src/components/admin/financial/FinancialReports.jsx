@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { adminAxios } from '../../../api/axios';
 import { Card, Container, Row, Col, Form, Button, Table, Alert } from 'react-bootstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import ErrorBoundary from '../../../components/common/ErrorBoundary';
 
 const FinancialReports = () => {
   const [reportData, setReportData] = useState(null);
@@ -87,206 +88,245 @@ const FinancialReports = () => {
     document.body.removeChild(link);
   };
 
+  // Safe format function to handle potential null/undefined values
   const formatPeriodLabel = (period) => {
-    if (reportType === 'daily') {
-      return format(new Date(period), 'MMM dd');
-    } else if (reportType === 'weekly') {
-      const [year, week] = period.split('-');
-      return `Week ${week}, ${year}`;
-    } else if (reportType === 'monthly') {
-      const [year, month] = period.split('-');
-      return format(new Date(parseInt(year), parseInt(month) - 1, 1), 'MMM yyyy');
+    if (!period) return 'Unknown';
+    
+    try {
+      if (reportType === 'daily') {
+        return format(parseISO(period), 'MMM dd');
+      } else if (reportType === 'weekly') {
+        const parts = period.split('-');
+        if (parts && parts.length === 2) {
+          const [year, week] = parts;
+          return `Week ${week}, ${year}`;
+        }
+      } else if (reportType === 'monthly') {
+        const parts = period.split('-');
+        if (parts && parts.length === 2) {
+          const [year, month] = parts;
+          // Use parseISO for more reliable date parsing
+          return format(new Date(parseInt(year), parseInt(month) - 1, 1), 'MMM yyyy');
+        }
+      }
+    } catch (err) {
+      console.error('Error formatting period:', err);
     }
-    return period;
+    
+    return period || 'Unknown';
   };
 
-  const chartData = reportData?.report_data?.map(item => ({
-    ...item,
-    formattedPeriod: formatPeriodLabel(item.period)
-  })) || [];
+  // Safe data mapping with error handling
+  const chartData = React.useMemo(() => {
+    if (!reportData?.report_data) return [];
+    
+    return reportData.report_data.map(item => {
+      if (!item) return {};
+      
+      try {
+        return {
+          ...item,
+          formattedPeriod: formatPeriodLabel(item.period)
+        };
+      } catch (err) {
+        console.error('Error processing chart data:', err);
+        return {
+          ...item,
+          formattedPeriod: 'Error'
+        };
+      }
+    });
+  }, [reportData, reportType]);
 
   return (
-    <Container fluid className="mt-4">
-      <Card className="mb-4">
-        <Card.Body>
-          <h2 className="mb-4">Financial Reports</h2>
-          
-          {/* Success/Error Messages */}
-          {successMessage && (
-            <Alert variant="success" className="mb-4">{successMessage}</Alert>
-          )}
-          {error && (
-            <Alert variant="danger" className="mb-4">{error}</Alert>
-          )}
-          
-          {/* Report Form */}
-          <Form onSubmit={handleSubmit}>
-            <Row className="mb-3">
-              <Col md={4}>
-                <Form.Group>
-                  <Form.Label>Start Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group>
-                  <Form.Label>End Date</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={4}>
-                <Form.Group>
-                  <Form.Label>Report Type</Form.Label>
-                  <Form.Select
-                    value={reportType}
-                    onChange={(e) => setReportType(e.target.value)}
-                  >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-            <div className="d-flex">
-              <Button type="submit" disabled={loading} className="me-2">
-                {loading ? 'Generating...' : 'Generate Report'}
-              </Button>
-              {reportData && (
-                <Button variant="outline-secondary" onClick={handleExportCSV}>
-                  Export as CSV
-                </Button>
-              )}
-            </div>
-          </Form>
-        </Card.Body>
-      </Card>
-      
-      {/* Report Results */}
-      {reportData && (
-        <>
-          <Card className="mb-4">
-            <Card.Body>
-              <h4 className="mb-3">Report Summary</h4>
-              <Row>
+    <ErrorBoundary showDetails={false}>
+      <Container fluid className="mt-4">
+        <Card className="mb-4">
+          <Card.Body>
+            <h2 className="mb-4">Financial Reports</h2>
+            
+            {/* Success/Error Messages */}
+            {successMessage && (
+              <Alert variant="success" className="mb-4">{successMessage}</Alert>
+            )}
+            {error && (
+              <Alert variant="danger" className="mb-4">{error}</Alert>
+            )}
+            
+            {/* Report Form */}
+            <Form onSubmit={handleSubmit}>
+              <Row className="mb-3">
                 <Col md={4}>
-                  <div className="mb-3">
-                    <strong>Report Type:</strong> {reportData.report_type.charAt(0).toUpperCase() + reportData.report_type.slice(1)}
-                  </div>
+                  <Form.Group>
+                    <Form.Label>Start Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={4}>
-                  <div className="mb-3">
-                    <strong>Period:</strong> {reportData.start_date} to {reportData.end_date}
-                  </div>
+                  <Form.Group>
+                    <Form.Label>End Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
                 </Col>
                 <Col md={4}>
-                  <div className="mb-3">
-                    <strong>Total Periods:</strong> {reportData.report_data.length}
-                  </div>
+                  <Form.Group>
+                    <Form.Label>Report Type</Form.Label>
+                    <Form.Select
+                      value={reportType}
+                      onChange={(e) => setReportType(e.target.value)}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </Form.Select>
+                  </Form.Group>
                 </Col>
               </Row>
-              
-              {/* Chart */}
-              {chartData.length > 0 && (
-                <div className="mt-4">
-                  <h5 className="mb-3">Revenue Visualization</h5>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="formattedPeriod" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => `$${value?.toFixed(2) || '0.00'}`} />
-                      <Legend />
-                      <Bar dataKey="total_revenue" name="Revenue" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-          
-          <Card>
-            <Card.Body>
-              <h4 className="mb-3">Detailed Report Data</h4>
-              <div className="table-responsive">
-                <Table striped hover>
-                  <thead>
-                    <tr>
-                      <th>Period</th>
-                      <th>Total Revenue</th>
-                      <th>Order Count</th>
-                      <th>Delivered</th>
-                      <th>Failed</th>
-                      <th>Success Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reportData.report_data.length > 0 ? (
-                      reportData.report_data.map((item, index) => {
-                        const successRate = item.order_count > 0 
-                          ? ((item.delivered_count / item.order_count) * 100).toFixed(1)
-                          : 0;
-                          
-                        return (
-                          <tr key={index}>
-                            <td>{formatPeriodLabel(item.period)}</td>
-                            <td>${parseFloat(item.total_revenue).toFixed(2)}</td>
-                            <td>{item.order_count}</td>
-                            <td>{item.delivered_count}</td>
-                            <td>{item.failed_count}</td>
-                            <td>{successRate}%</td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center">No report data available</td>
-                      </tr>
-                    )}
-                  </tbody>
-                  {reportData.report_data.length > 0 && (
-                    <tfoot>
-                      <tr className="table-active fw-bold">
-                        <td>Total</td>
-                        <td>
-                          ${reportData.report_data.reduce((sum, item) => sum + parseFloat(item.total_revenue), 0).toFixed(2)}
-                        </td>
-                        <td>
-                          {reportData.report_data.reduce((sum, item) => sum + parseInt(item.order_count), 0)}
-                        </td>
-                        <td>
-                          {reportData.report_data.reduce((sum, item) => sum + parseInt(item.delivered_count), 0)}
-                        </td>
-                        <td>
-                          {reportData.report_data.reduce((sum, item) => sum + parseInt(item.failed_count), 0)}
-                        </td>
-                        <td>
-                          {(() => {
-                            const totalOrders = reportData.report_data.reduce((sum, item) => sum + parseInt(item.order_count), 0);
-                            const totalDelivered = reportData.report_data.reduce((sum, item) => sum + parseInt(item.delivered_count), 0);
-                            return totalOrders > 0 ? ((totalDelivered / totalOrders) * 100).toFixed(1) + '%' : '0%';
-                          })()}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  )}
-                </Table>
+              <div className="d-flex">
+                <Button type="submit" disabled={loading} className="me-2">
+                  {loading ? 'Generating...' : 'Generate Report'}
+                </Button>
+                {reportData && (
+                  <Button variant="outline-secondary" onClick={handleExportCSV}>
+                    Export as CSV
+                  </Button>
+                )}
               </div>
-            </Card.Body>
-          </Card>
-        </>
-      )}
-    </Container>
+            </Form>
+          </Card.Body>
+        </Card>
+        
+        {/* Report Results */}
+        {reportData && (
+          <>
+            <Card className="mb-4">
+              <Card.Body>
+                <h4 className="mb-3">Report Summary</h4>
+                <Row>
+                  <Col md={4}>
+                    <div className="mb-3">
+                      <strong>Report Type:</strong> {reportData.report_type && 
+                        reportData.report_type.charAt(0).toUpperCase() + reportData.report_type.slice(1)}
+                    </div>
+                  </Col>
+                  <Col md={4}>
+                    <div className="mb-3">
+                      <strong>Period:</strong> {reportData.start_date || 'N/A'} to {reportData.end_date || 'N/A'}
+                    </div>
+                  </Col>
+                  <Col md={4}>
+                    <div className="mb-3">
+                      <strong>Total Periods:</strong> {reportData.report_data?.length || 0}
+                    </div>
+                  </Col>
+                </Row>
+                
+                {/* Chart */}
+                {chartData.length > 0 && (
+                  <div className="mt-4">
+                    <h5 className="mb-3">Revenue Visualization</h5>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="formattedPeriod" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => `$${value?.toFixed(2) || '0.00'}`} />
+                        <Legend />
+                        <Bar dataKey="total_revenue" name="Revenue" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+            
+            <Card>
+              <Card.Body>
+                <h4 className="mb-3">Detailed Report Data</h4>
+                <div className="table-responsive">
+                  <Table striped hover>
+                    <thead>
+                      <tr>
+                        <th>Period</th>
+                        <th>Total Revenue</th>
+                        <th>Order Count</th>
+                        <th>Delivered</th>
+                        <th>Failed</th>
+                        <th>Success Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportData.report_data && reportData.report_data.length > 0 ? (
+                        reportData.report_data.map((item, index) => {
+                          if (!item) return null;
+                          
+                          const orderCount = parseInt(item.order_count) || 0;
+                          const deliveredCount = parseInt(item.delivered_count) || 0;
+                          const successRate = orderCount > 0 
+                            ? ((deliveredCount / orderCount) * 100).toFixed(1)
+                            : 0;
+                            
+                          return (
+                            <tr key={index}>
+                              <td>{formatPeriodLabel(item.period)}</td>
+                              <td>${parseFloat(item.total_revenue || 0).toFixed(2)}</td>
+                              <td>{orderCount}</td>
+                              <td>{deliveredCount}</td>
+                              <td>{parseInt(item.failed_count) || 0}</td>
+                              <td>{successRate}%</td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="text-center">No report data available</td>
+                        </tr>
+                      )}
+                    </tbody>
+                    {reportData.report_data && reportData.report_data.length > 0 && (
+                      <tfoot>
+                        <tr className="table-active fw-bold">
+                          <td>Total</td>
+                          <td>
+                            ${reportData.report_data.reduce((sum, item) => sum + parseFloat(item?.total_revenue || 0), 0).toFixed(2)}
+                          </td>
+                          <td>
+                            {reportData.report_data.reduce((sum, item) => sum + parseInt(item?.order_count || 0), 0)}
+                          </td>
+                          <td>
+                            {reportData.report_data.reduce((sum, item) => sum + parseInt(item?.delivered_count || 0), 0)}
+                          </td>
+                          <td>
+                            {reportData.report_data.reduce((sum, item) => sum + parseInt(item?.failed_count || 0), 0)}
+                          </td>
+                          <td>
+                            {(() => {
+                              const totalOrders = reportData.report_data.reduce((sum, item) => sum + parseInt(item?.order_count || 0), 0);
+                              const totalDelivered = reportData.report_data.reduce((sum, item) => sum + parseInt(item?.delivered_count || 0), 0);
+                              return totalOrders > 0 ? ((totalDelivered / totalOrders) * 100).toFixed(1) + '%' : '0%';
+                            })()}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </Table>
+                </div>
+              </Card.Body>
+            </Card>
+          </>
+        )}
+      </Container>
+    </ErrorBoundary>
   );
 };
 
